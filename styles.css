@@ -1,0 +1,296 @@
+:root {
+    --md-sys-color-primary: #1976d2;
+    --md-sys-color-on-primary: #ffffff;
+    --md-sys-color-primary-container: #e3f2fd;
+    --md-sys-color-on-primary-container: #0d47a1;
+    --md-sys-color-secondary: #03dac6;
+    --md-sys-color-on-secondary: #000000;
+    --md-sys-color-surface: #ffffff;
+    --md-sys-color-on-surface: #1c1b1f;
+    --md-sys-color-surface-variant: #f5f5f5;
+    --md-sys-color-on-surface-variant: #49454f;
+    --md-sys-color-outline: #79747e;
+    --md-sys-color-error: #b00020;
+    --md-sys-color-on-error: #ffffff;
+    
+    /* Elevation */
+    --md-sys-elevation-1: 0px 1px 3px rgba(0,0,0,0.12);
+    --md-sys-elevation-2: 0px 2px 6px rgba(0,0,0,0.16);
+    --md-sys-elevation-3: 0px 4px 12px rgba(0,0,0,0.16);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-color: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+    line-height: 1.5;
+}
+
+/* Typography Scale */
+.headline-large { font-size: 32px; font-weight: 400; line-height: 40px; }
+.headline-medium { font-size: 28px; font-weight: 400; line-height: 36px; }
+.headline-small { font-size: 24px; font-weight: 400; line-height: 32px; }
+.title-large { font-size: 22px; font-weight: 500; line-height: 28px; }
+.title-medium { font-size: 16px; font-weight: 500; line-height: 24px; }
+.body-large { font-size: 16px; font-weight: 400; line-height: 24px; }
+.body-medium { font-size: 14px; font-weight: 400; line-height: 20px; }
+.label-large { font-size: 14px; font-weight: 500; line-height: 20px; }
+.label-medium { font-size: 12px; font-weight: 500; line-height: 16px; }
+
+.app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--md-sys-color-surface);
+}
+
+/* Top App Bar */
+.top-app-bar {
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    padding: 16px 24px;
+    box-shadow: var(--md-sys-elevation-2);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.location-section {
+    background: var(--md-sys-color-surface-variant);
+    padding: 24px;
+    margin-bottom: 16px;
+}
+
+.location-input {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid var(--md-sys-color-outline);
+    border-radius: 12px;
+    font-size: 16px;
+    background: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+}
+
+.location-input:focus {
+    outline: none;
+    border-color: var(--md-sys-color-primary);
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.md-button {
+    padding: 10px 24px;
+    border-radius: 20px;
+    border: none;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.md-button-filled {
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+}
+
+.md-button-outlined {
+    background: transparent;
+    color: var(--md-sys-color-primary);
+    border: 1px solid var(--md-sys-color-outline);
+}
+
+.md-button:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--md-sys-elevation-2);
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--md-sys-color-outline);
+    border-top: 4px solid var(--md-sys-color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.skateparks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 24px;
+    padding: 24px;
+}
+
+.skatepark-card {
+    background: var(--md-sys-color-surface);
+    border-radius: 16px;
+    box-shadow: var(--md-sys-elevation-1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.skatepark-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--md-sys-elevation-3);
+}
+
+.card-header {
+    padding: 20px;
+    background: linear-gradient(135deg, var(--md-sys-color-primary-container), var(--md-sys-color-surface-variant));
+}
+
+.card-content {
+    padding: 20px;
+}
+
+.skatepark-name {
+    margin-bottom: 8px;
+    color: var(--md-sys-color-on-primary-container);
+}
+
+.distance-badge {
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.info-section {
+    margin-bottom: 20px;
+}
+
+.info-section h4 {
+    margin-bottom: 8px;
+    color: var(--md-sys-color-primary);
+}
+
+.weather-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.weather-item {
+    background: var(--md-sys-color-surface-variant);
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.weather-temp {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--md-sys-color-primary);
+}
+
+.cost-free {
+    color: var(--md-sys-color-secondary);
+    font-weight: 500;
+}
+
+.cost-paid {
+    color: var(--md-sys-color-error);
+    font-weight: 500;
+}
+
+.reviews-section {
+    background: var(--md-sys-color-surface-variant);
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.stars {
+    color: #ffc107;
+}
+
+.review-text {
+    font-style: italic;
+    color: var(--md-sys-color-on-surface-variant);
+    margin-bottom: 8px;
+}
+
+.card-actions {
+    padding: 16px 20px;
+    background: var(--md-sys-color-surface-variant);
+    display: flex;
+    justify-content: center;
+}
+
+.directions-btn {
+    background: var(--md-sys-color-secondary);
+    color: var(--md-sys-color-on-secondary);
+    text-decoration: none;
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.directions-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--md-sys-elevation-2);
+}
+
+.error {
+    background: var(--md-sys-color-error);
+    color: var(--md-sys-color-on-error);
+    padding: 16px;
+    border-radius: 8px;
+    margin: 16px 24px;
+}
+
+@media (max-width: 768px) {
+    .skateparks-grid {
+        grid-template-columns: 1fr;
+        padding: 16px;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .md-button {
+        justify-content: center;
+    }
+}
