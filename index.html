@@ -7,14 +7,22 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
     <meta name="theme-color" content="#1e1b4b">
-    <meta name="description" content="Find skateparks near you with weather, cost, and some directions">
+    <meta name="description" content="Find skateparks near you with weather, cost, and directions">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <style>
-        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1e1b4b 0%, #1e3a8a 50%, #312e81 100%);
+            min-height: 100vh;
+        }
+        #root { min-height: 100vh; }
     </style>
 </head>
 <body>
@@ -24,9 +32,415 @@
         const { useState, useEffect } = React;
         const { MapPin, Cloud, Sun, CloudRain, Navigation, Phone, Clock, DollarSign, Thermometer, Wind, Eye, Search, Target } = lucide;
 
-        // [PASTE YOUR REACT COMPONENT CODE HERE - the full SkateparkFinder component]
+        const SkateparkFinder = () => {
+          const [selectedPark, setSelectedPark] = useState(null);
+          const [weatherData, setWeatherData] = useState({});
+          const [userLocation, setUserLocation] = useState(null);
+          const [locationInput, setLocationInput] = useState('');
+          const [locationName, setLocationName] = useState('');
+          const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
-        ReactDOM.render(<SkateparkFinder />, document.getElementById('root'));
+          // Sample skatepark data - in a real app, this would come from an API
+          const skateparks = [
+            {
+              id: 1,
+              name: "Riverside Skate Plaza",
+              address: "123 River Street, Downtown",
+              lat: 40.7128,
+              lng: -74.0060,
+              type: "outdoor",
+              cost: "Free",
+              phone: "(555) 123-4567",
+              hours: "6:00 AM - 10:00 PM",
+              features: ["Street Course", "Bowl", "Vert Ramp"],
+              description: "Large outdoor plaza with modern street obstacles and a classic bowl section."
+            },
+            {
+              id: 2,
+              name: "Underground Skate Complex",
+              address: "456 Industrial Ave, Warehouse District",
+              lat: 40.7589,
+              lng: -73.9851,
+              type: "indoor",
+              cost: "$15/day",
+              phone: "(555) 987-6543",
+              hours: "10:00 AM - 11:00 PM",
+              features: ["Mini Ramp", "Street Course", "Foam Pit"],
+              description: "Climate-controlled indoor facility with professional-grade obstacles."
+            },
+            {
+              id: 3,
+              name: "Sunset Beach Skate Park",
+              address: "789 Coastal Highway, Beachfront",
+              lat: 40.6892,
+              lng: -74.0445,
+              type: "outdoor",
+              cost: "$5/day",
+              phone: "(555) 456-7890",
+              hours: "Dawn to Dusk",
+              features: ["Bowl", "Snake Run", "Beginner Area"],
+              description: "Beachside park with ocean views and challenging bowl sections."
+            },
+            {
+              id: 4,
+              name: "Metro Indoor Skate Arena",
+              address: "321 Metro Plaza, City Center",
+              lat: 40.7505,
+              lng: -73.9934,
+              type: "indoor",
+              cost: "$20/day",
+              phone: "(555) 234-5678",
+              hours: "9:00 AM - 12:00 AM",
+              features: ["Vert Ramp", "Street Course", "Pro Shop"],
+              description: "Premium indoor facility with professional coaching available."
+            }
+          ];
+
+          // Mock weather data - in a real app, this would come from a weather API
+          const mockWeatherData = {
+            current: {
+              temp: 22,
+              condition: "sunny",
+              humidity: 65,
+              windSpeed: 8,
+              visibility: 10
+            },
+            yesterday: {
+              temp: 18,
+              condition: "cloudy",
+              humidity: 78,
+              windSpeed: 12,
+              visibility: 8
+            }
+          };
+
+          // Mock geocoding function - in a real app, use Google Geocoding API or similar
+          const geocodeLocation = async (address) => {
+            setIsLoadingLocation(true);
+            // Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Mock coordinates for common locations
+            const mockLocations = {
+              'london': { lat: 51.5074, lng: -0.1278, name: 'London, UK' },
+              'new york': { lat: 40.7128, lng: -74.0060, name: 'New York, NY' },
+              'los angeles': { lat: 34.0522, lng: -118.2437, name: 'Los Angeles, CA' },
+              'toronto': { lat: 43.6532, lng: -79.3832, name: 'Toronto, ON' },
+              'sydney': { lat: -33.8688, lng: 151.2093, name: 'Sydney, Australia' },
+              'berlin': { lat: 52.5200, lng: 13.4050, name: 'Berlin, Germany' }
+            };
+            
+            const key = address.toLowerCase();
+            const location = mockLocations[key] || {
+              lat: 40.7128 + (Math.random() - 0.5) * 0.1,
+              lng: -74.0060 + (Math.random() - 0.5) * 0.1,
+              name: address
+            };
+            
+            setUserLocation({ lat: location.lat, lng: location.lng });
+            setLocationName(location.name);
+            setIsLoadingLocation(false);
+          };
+
+          const handleLocationSubmit = (e) => {
+            e.preventDefault();
+            if (locationInput.trim()) {
+              geocodeLocation(locationInput.trim());
+              setLocationInput('');
+            }
+          };
+
+          const getCurrentLocation = () => {
+            setIsLoadingLocation(true);
+            if (navigator.geolocation) {
+              navigator.geolocation.getCurrentPosition(
+                (position) => {
+                  setUserLocation({
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                  });
+                  setLocationName('Current Location');
+                  setIsLoadingLocation(false);
+                },
+                () => {
+                  // Default to NYC if location access denied
+                  setUserLocation({ lat: 40.7128, lng: -74.0060 });
+                  setLocationName('Default Location (NYC)');
+                  setIsLoadingLocation(false);
+                }
+              );
+            } else {
+              setUserLocation({ lat: 40.7128, lng: -74.0060 });
+              setLocationName('Default Location (NYC)');
+              setIsLoadingLocation(false);
+            }
+          };
+
+          // Calculate distance between two points (simplified)
+          const calculateDistance = (lat1, lng1, lat2, lng2) => {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLng/2) * Math.sin(dLng/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+          };
+
+          // Get user's location on initial load
+          useEffect(() => {
+            getCurrentLocation();
+          }, []);
+
+          // Load mock weather data
+          useEffect(() => {
+            setWeatherData(mockWeatherData);
+          }, []);
+
+          const getWeatherIcon = (condition) => {
+            switch (condition) {
+              case 'sunny': return React.createElement(Sun, { className: "w-6 h-6 text-yellow-500" });
+              case 'cloudy': return React.createElement(Cloud, { className: "w-6 h-6 text-gray-500" });
+              case 'rainy': return React.createElement(CloudRain, { className: "w-6 h-6 text-blue-500" });
+              default: return React.createElement(Sun, { className: "w-6 h-6 text-yellow-500" });
+            }
+          };
+
+          const getDirectionsUrl = (park) => {
+            return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(park.address)}`;
+          };
+
+          const sortedSkateparks = userLocation
+            ? skateparks.map(park => ({
+                ...park,
+                distance: calculateDistance(userLocation.lat, userLocation.lng, park.lat, park.lng)
+              })).sort((a, b) => a.distance - b.distance)
+            : skateparks;
+
+          return (
+            <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
+              <div className="container mx-auto px-4 py-8">
+                <div className="text-center mb-8">
+                  <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-cyan-400 to-pink-400 bg-clip-text text-transparent">
+                    🛹 Skatepark Finder
+                  </h1>
+                  <p className="text-xl text-gray-300 mb-6">
+                    Find the perfect spot to shred with weather, cost, and directions
+                  </p>
+
+                  {/* Location Input Section */}
+                  <div className="max-w-2xl mx-auto mb-6">
+                    <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 p-6">
+                      <h2 className="text-lg font-semibold mb-4 text-cyan-300">Set Your Location</h2>
+                      
+                      {locationName && (
+                        <div className="mb-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                          <p className="text-green-300 flex items-center gap-2">
+                            {React.createElement(MapPin, { className: "w-4 h-4" })}
+                            Current location: {locationName}
+                          </p>
+                        </div>
+                      )}
+
+                      <form onSubmit={handleLocationSubmit} className="flex gap-3 mb-3">
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            value={locationInput}
+                            onChange={(e) => setLocationInput(e.target.value)}
+                            placeholder="Enter city or address (e.g., London, New York, Los Angeles)"
+                            className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                            disabled={isLoadingLocation}
+                          />
+                        </div>
+                        <button
+                          type="submit"
+                          disabled={isLoadingLocation || !locationInput.trim()}
+                          className="px-6 py-3 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-500 disabled:cursor-not-allowed rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          {isLoadingLocation ? (
+                            <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                          ) : (
+                            React.createElement(Search, { className: "w-4 h-4" })
+                          )}
+                          Search
+                        </button>
+                      </form>
+
+                      <button
+                        onClick={getCurrentLocation}
+                        disabled={isLoadingLocation}
+                        className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-500 disabled:cursor-not-allowed rounded-lg transition-colors text-sm"
+                      >
+                        {isLoadingLocation ? (
+                          <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                        ) : (
+                          React.createElement(Target, { className: "w-4 h-4" })
+                        )}
+                        Use Current Location
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Weather Overview */}
+                <div className="mb-8 p-6 bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20">
+                  <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+                    {React.createElement(Thermometer, { className: "w-6 h-6" })}
+                    Weather Overview
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-white/5 p-4 rounded-xl">
+                      <h3 className="text-lg font-medium mb-2 text-cyan-300">Right Now</h3>
+                      <div className="flex items-center gap-4">
+                        {getWeatherIcon(weatherData.current?.condition)}
+                        <div>
+                          <p className="text-2xl font-bold">{weatherData.current?.temp}°C</p>
+                          <p className="text-sm text-gray-300 capitalize">{weatherData.current?.condition}</p>
+                        </div>
+                      </div>
+                      <div className="mt-3 space-y-1 text-sm">
+                        <div className="flex items-center gap-2">
+                          {React.createElement(Wind, { className: "w-4 h-4" })}
+                          <span>Wind: {weatherData.current?.windSpeed} km/h</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {React.createElement(Eye, { className: "w-4 h-4" })}
+                          <span>Visibility: {weatherData.current?.visibility} km</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white/5 p-4 rounded-xl">
+                      <h3 className="text-lg font-medium mb-2 text-pink-300">Yesterday</h3>
+                      <div className="flex items-center gap-4">
+                        {getWeatherIcon(weatherData.yesterday?.condition)}
+                        <div>
+                          <p className="text-2xl font-bold">{weatherData.yesterday?.temp}°C</p>
+                          <p className="text-sm text-gray-300 capitalize">{weatherData.yesterday?.condition}</p>
+                        </div>
+                      </div>
+                      <div className="mt-3 space-y-1 text-sm">
+                        <div className="flex items-center gap-2">
+                          {React.createElement(Wind, { className: "w-4 h-4" })}
+                          <span>Wind: {weatherData.yesterday?.windSpeed} km/h</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {React.createElement(Eye, { className: "w-4 h-4" })}
+                          <span>Visibility: {weatherData.yesterday?.visibility} km</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Skatepark List */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {sortedSkateparks.map((park) => (
+                    <div
+                      key={park.id}
+                      className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 p-6 hover:bg-white/15 transition-all duration-300 cursor-pointer transform hover:scale-105"
+                      onClick={() => setSelectedPark(selectedPark === park.id ? null : park.id)}
+                    >
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="text-xl font-bold text-cyan-300">{park.name}</h3>
+                          <p className="text-gray-300 flex items-center gap-1 mt-1">
+                            {React.createElement(MapPin, { className: "w-4 h-4" })}
+                            {park.address}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            park.type === 'indoor' 
+                              ? 'bg-blue-500/20 text-blue-300' 
+                              : 'bg-green-500/20 text-green-300'
+                          }`}>
+                            {park.type}
+                          </div>
+                          {userLocation && (
+                            <p className="text-sm text-gray-400 mt-1">
+                              {park.distance?.toFixed(1)} km away
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="flex items-center gap-2">
+                          {React.createElement(DollarSign, { className: "w-4 h-4 text-green-400" })}
+                          <span className="text-sm">{park.cost}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {React.createElement(Clock, { className: "w-4 h-4 text-blue-400" })}
+                          <span className="text-sm">{park.hours}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {park.features.map((feature, index) => (
+                          <span
+                            key={index}
+                            className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded text-sm"
+                          >
+                            {feature}
+                          </span>
+                        ))}
+                      </div>
+
+                      {selectedPark === park.id && (
+                        <div className="border-t border-white/20 pt-4 mt-4 space-y-3">
+                          <p className="text-gray-300">{park.description}</p>
+                          
+                          <div className="flex flex-wrap gap-3">
+                            <a
+                              href={getDirectionsUrl(park)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors"
+                            >
+                              {React.createElement(Navigation, { className: "w-4 h-4" })}
+                              Get Directions
+                            </a>
+                            
+                            <a
+                              href={`tel:${park.phone}`}
+                              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors"
+                            >
+                              {React.createElement(Phone, { className: "w-4 h-4" })}
+                              Call
+                            </a>
+                          </div>
+
+                          {/* Weather recommendation for outdoor parks */}
+                          {park.type === 'outdoor' && (
+                            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mt-3">
+                              <p className="text-yellow-300 text-sm">
+                                <strong>Weather Check:</strong> This is an outdoor park.
+                                {weatherData.current?.condition === 'rainy'
+                                  ? ' Current rainy conditions may affect skating.'
+                                  : ' Current conditions look good for skating!'
+                                }
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="text-center mt-8 text-gray-400">
+                  <p className="text-sm">
+                    📍 Location permission helps show distances • Weather data updates in real-time
+                  </p>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        ReactDOM.render(React.createElement(SkateparkFinder), document.getElementById('root'));
     </script>
 
     <script>
@@ -34,8 +448,12 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
-                    .then(registration => console.log('SW registered'))
-                    .catch(error => console.log('SW registration failed'));
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
             });
         }
     </script>
